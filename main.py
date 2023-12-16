@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QApplication, QLineEdit, QTextEdit, QPushButton, QListWidget, QInputDialog
+from PyQt5.QtWidgets import QWidget, QHBoxLayout, QVBoxLayout, QApplication, QLineEdit, QTextEdit, QPushButton, QListWidget, QInputDialog, QMessageBox
 
 import json
 
@@ -34,18 +34,29 @@ delete_btn2.setStyleSheet('''background-color: #FFFF00''')
 line1.addWidget(text)
 line2.addWidget(notes_list)
 line2.addWidget(create_btn)
-line2.addWidget(btn_save)
-line2.addWidget(delete_btn)
+
+h_line = QHBoxLayout()
+
+h_line.addWidget(btn_save)
+h_line.addWidget(delete_btn)
+
+
+line2.addLayout(h_line)
+
 
 line2.addWidget(tags_list)
 line2.addWidget(lineText)
 line2.addWidget(create_btn)
 
 line2.addWidget(create_btn2)
-line2.addWidget(btn_save2)
-line2.addWidget(delete_btn2)
 
 
+h_line2 = QHBoxLayout()
+
+h_line2.addWidget(btn_save2)
+h_line2.addWidget(delete_btn2)
+
+line2.addLayout(h_line2)
 
 mainline.addLayout(line1, stretch=2)
 mainline.addLayout(line2, stretch=1)
@@ -58,12 +69,15 @@ def writeFile():
 
 
 def save_note():
-    note_text = text.toPlainText()
-    note_name = notes_list.currentItem().text()
+    try:
+        note_text = text.toPlainText()
+        note_name = notes_list.currentItem().text()
 
-    notes[note_name]['text'] = note_text
-    writeFile()
-
+        notes[note_name]['text'] = note_text
+        writeFile()
+    except:
+        msg = QMessageBox(window, text="Виберіть замітку")
+        msg.show()
 
 notes = {}
 
@@ -94,27 +108,35 @@ def add_tag():
 create_btn2.clicked.connect(add_tag)
 
 def del_tag():
-    note_name = notes_list.currentItem().text()
-    tag_name = tags_list.currentItem().text()
+    try:
+        note_name = notes_list.currentItem().text()
+        tag_name = tags_list.currentItem().text()
 
-    notes[note_name]["tags"].remove(tag_name)
+        notes[note_name]["tags"].remove(tag_name)
 
-    tags_list.clear()
-    tags_list.addItems(notes[note_name]['tags'])
+        tags_list.clear()
+        tags_list.addItems(notes[note_name]['tags'])
 
-    writeFile()
+        writeFile()
+    except:
+        msg = QMessageBox(window, text="Виберіть тег")
+        msg.show()
 
 
 def del_note():
-    note_name = notes_list.currentItem().text()
+    try:
+        note_name = notes_list.currentItem().text()
 
-    del notes[note_name]
+        del notes[note_name]
 
-    notes_list.clear()
-    tags_list.clear()
-    notes_list.addItems(notes)
+        notes_list.clear()
+        tags_list.clear()
+        notes_list.addItems(notes)
 
-    writeFile()
+        writeFile()
+    except:
+        msg = QMessageBox(window, text="Виберіть замітку")
+        msg.show()
 
 
 
@@ -149,9 +171,11 @@ btn_save2.clicked.connect(del_tag)
 delete_btn.clicked.connect(del_note)
 
 notes_list.itemClicked.connect(show_note)
-
-with open("notes.json", "r", encoding="utf-8") as file:
-    notes = json.load(file)
+try:
+    with open("notes.json", "r", encoding="utf-8") as file:
+        notes = json.load(file)
+except:
+    print("File not found")
 
 notes_list.addItems(notes)
 
